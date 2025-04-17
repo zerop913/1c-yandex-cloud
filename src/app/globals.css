@@ -58,6 +58,99 @@ input,
   transition-duration: 250ms;
 }
 
+/* Устанавливаем курсор pointer для всех кнопок и ссылок */
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Устанавливаем курсор text для текстовых полей ввода */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+.cursor-text {
+  cursor: text;
+}
+
+/* Улучшения для полей ввода */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="search"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark textarea {
+  background-color: rgba(30, 30, 30, 0.8);
+  border-color: var(--border);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+  outline: none;
+}
+
+/* Остальные полезные курсоры */
+.cursor-move {
+  cursor: move;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+
+.cursor-zoom-out {
+  cursor: zoom-out;
+}
+
+.cursor-help {
+  cursor: help;
+}
+
 /* Добавляем градиентный фон для всей страницы */
 body {
   background: linear-gradient(135deg, var(--accent) 0%, var(--background) 100%);
@@ -307,6 +400,35 @@ html {
 .card-interactive:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px -5px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Стили для кода и пре-форматированного текста */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  padding: 0.5rem;
+  background: transparent;
+}
+
+.dark pre {
+  color: #e0e0e0;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  background-color: var(--muted);
+}
+
+.dark code {
+  background-color: rgba(30, 30, 30, 0.8);
 }
 
 /* Обеспечиваем лучшую совместимость цветов на мобильных устройствах */

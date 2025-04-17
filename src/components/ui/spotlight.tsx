@@ -18,6 +18,8 @@ export function Spotlight({
     width: 0,
     height: 0,
   });
+  const [autoMoving, setAutoMoving] = useState(true);
+  const positionRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     setMounted(true);
@@ -31,51 +33,74 @@ export function Spotlight({
     handleResize();
     window.addEventListener("resize", handleResize);
 
+    // Устанавливаем ограничение на передвижение при наведении
+    const handleMouseEnter = () => {
+      setAutoMoving(false);
+    };
+
+    const handleMouseLeave = () => {
+      setAutoMoving(true);
+    };
+
+    if (divRef.current) {
+      divRef.current.addEventListener("mouseenter", handleMouseEnter);
+      divRef.current.addEventListener("mouseleave", handleMouseLeave);
+    }
+
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (divRef.current) {
+        divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+        divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
     };
   }, []);
 
+  // Более плавное автономное движение
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !autoMoving) return;
 
-    // Автономное плавное перемещение градиента
-    const interval = setInterval(() => {
-      const maxX = windowDimensions.width / 3;
-      const maxY = windowDimensions.height / 3;
+    // Используем requestAnimationFrame для более плавной анимации
+    let animationId: number;
+    let lastTime = 0;
+    const speed = 0.05; // Снижаем скорость для более плавного движения
 
-      // Расчёт новой позиции с плавным перемещением
-      setPosition((prevPosition) => ({
-        x: prevPosition.x + (Math.random() * 2 - 1) * 2,
-        y: prevPosition.y + (Math.random() * 2 - 1) * 2,
-      }));
-    }, 50);
+    const animate = (time: number) => {
+      if (!lastTime) lastTime = time;
+      const deltaTime = time - lastTime;
+      lastTime = time;
 
-    // Периодическое изменение целевой точки движения
-    const targetInterval = setInterval(() => {
-      const maxX = windowDimensions.width / 2;
-      const maxY = windowDimensions.height / 2;
+      // Плавное изменение позиции с меньшей амплитудой
+      positionRef.current.x += Math.sin(time * 0.0005) * speed * deltaTime;
+      positionRef.current.y += Math.cos(time * 0.0005) * speed * deltaTime;
 
       setPosition({
-        x: (Math.random() - 0.5) * maxX,
-        y: (Math.random() - 0.5) * maxY,
+        x: positionRef.current.x,
+        y: positionRef.current.y,
       });
-    }, 5000);
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
 
     return () => {
-      clearInterval(interval);
-      clearInterval(targetInterval);
+      cancelAnimationFrame(animationId);
     };
-  }, [windowDimensions, mounted]);
+  }, [mounted, autoMoving]);
 
   if (!mounted) {
-    return <div className={`fixed inset-0 pointer-events-none ${className}`} />;
+    return (
+      <div
+        className={`fixed inset-0 pointer-events-none spotlight ${className}`}
+      />
+    );
   }
 
   return (
     <div
       ref={divRef}
-      className={`fixed inset-0 overflow-hidden pointer-events-none ${className}`}
+      className={`fixed inset-0 overflow-hidden pointer-events-none spotlight ${className}`}
       style={{ zIndex: 0 }}
     >
       {windowDimensions.width > 0 && (
@@ -87,9 +112,9 @@ export function Spotlight({
           }}
           transition={{
             type: "spring",
-            damping: 100,
-            stiffness: 20,
-            mass: 3,
+            damping: 80, // Увеличиваем затухание
+            stiffness: 10, // Уменьшаем жесткость
+            mass: 2,
           }}
         >
           <svg width="100%" height="100%">
@@ -102,9 +127,10 @@ export function Spotlight({
                 fx="50%"
                 fy="50%"
               >
-                <stop offset="0%" stopColor={fill} stopOpacity="0.4" />
-                <stop offset="40%" stopColor={fill} stopOpacity="0.2" />
-                <stop offset="70%" stopColor={fill} stopOpacity="0.1" />
+                <stop offset="0%" stopColor={fill} stopOpacity="0.3" />{" "}
+                {/* Уменьшаем непрозрачность */}
+                <stop offset="40%" stopColor={fill} stopOpacity="0.15" />
+                <stop offset="70%" stopColor={fill} stopOpacity="0.05" />
                 <stop offset="100%" stopColor={fill} stopOpacity="0" />
               </radialGradient>
             </defs>

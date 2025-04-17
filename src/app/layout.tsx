@@ -29,6 +29,7 @@ export default function RootLayout({
           ["--font-geist-sans" as string]: "var(--font-sans)",
           ["--font-geist-mono" as string]: "var(--font-mono)",
         }}
+        suppressHydrationWarning
       >
         <ClientRootLayout>{children}</ClientRootLayout>
       </body>

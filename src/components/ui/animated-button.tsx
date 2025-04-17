@@ -7,13 +7,18 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 
 interface AnimatedButtonProps {
-  href: string;
+  href?: string;
   variant: "primary" | "secondary" | "outline";
   children: ReactNode;
   className?: string;
   icon?: ReactNode;
   iconPosition?: "left" | "right";
   scrollTo?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+  type?: "button" | "submit" | "reset";
+  target?: string;
+  rel?: string;
 }
 
 export function AnimatedButton({
@@ -24,6 +29,11 @@ export function AnimatedButton({
   icon,
   iconPosition = "right",
   scrollTo = false,
+  onClick,
+  disabled = false,
+  type = "button",
+  target,
+  rel,
 }: AnimatedButtonProps) {
   const { theme } = useTheme();
   const isLightTheme = theme === "light";
@@ -46,8 +56,10 @@ export function AnimatedButton({
   };
 
   // Обработчик клика для плавного скролла
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!scrollTo || !href.startsWith("#")) return;
+  const handleClick = (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
+  ) => {
+    if (!scrollTo || !href || !href.startsWith("#")) return;
 
     e.preventDefault();
     const target = document.querySelector(href);
@@ -62,16 +74,9 @@ export function AnimatedButton({
     window.history.pushState(null, "", href);
   };
 
-  return (
-    <Link
-      href={href}
-      onClick={handleClick}
-      className={cn(
-        "relative group overflow-hidden rounded-full px-7 py-3.5 inline-flex items-center justify-center font-medium transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
-        getVariantStyles(),
-        className
-      )}
-    >
+  // Общие стили и эффекты
+  const buttonContent = (
+    <>
       <motion.span
         className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/10 via-white/30 to-white/10"
         style={{ rotate: -35, scale: 1.5, opacity: 0, x: -100 }}
@@ -114,6 +119,46 @@ export function AnimatedButton({
           transition={{ duration: 0.3 }}
         />
       )}
-    </Link>
+    </>
+  );
+
+  // Общие классы для стилей
+  const buttonClasses = cn(
+    "relative group overflow-hidden rounded-full px-7 py-3.5 inline-flex items-center justify-center font-medium transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
+    getVariantStyles(),
+    disabled && "opacity-70 pointer-events-none cursor-not-allowed",
+    className
+  );
+
+  // Если указан href, возвращаем Link
+  if (href) {
+    return (
+      <Link
+        href={href}
+        onClick={(e) => {
+          handleClick(e);
+          onClick && onClick();
+        }}
+        className={buttonClasses}
+        target={target}
+        rel={rel}
+      >
+        {buttonContent}
+      </Link>
+    );
+  }
+
+  // Иначе возвращаем кнопку
+  return (
+    <motion.button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={buttonClasses}
+      whileHover={{ scale: disabled ? 1 : 1.02 }}
+      whileTap={{ scale: disabled ? 1 : 0.98 }}
+    >
+      {buttonContent}
+    </motion.button>
   );
 }
